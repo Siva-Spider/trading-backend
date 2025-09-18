@@ -17,7 +17,6 @@ from logger_module import logger
 app = Flask(__name__)
 CORS(app)
 
-<<<<<<< HEAD
 @app.route("/")
 =======
 app.route("/", methods=["GET"])
