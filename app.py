@@ -120,9 +120,10 @@ def connect_broker():
     
     data = request.get_json()
     brokers_data = data.get('brokers', [])
+    selected_brokers = data.get("selectedBrokers", [])
     responses = []
 
-    for broker_item in brokers_data:
+    for broker_item in selected_brokers:
         broker_key = broker_item.get('name')
         creds = broker_item.get('credentials')
         broker_name = broker_map.get(broker_key)
