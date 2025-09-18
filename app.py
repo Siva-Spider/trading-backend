@@ -21,7 +21,6 @@ CORS(app)
 @app.route("/")
 =======
 app.route("/", methods=["GET"])
->>>>>>> 954995cc745c95bf8f5834e85b538ecaf160781a
 def home():
     return {"status": "Backend is running 🚀"}
 
