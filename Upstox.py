@@ -41,7 +41,7 @@ def upstox_profile(access_token):
     return None
 
 def upstox_balance(access_token):
-    print("DEBUG: entered upstox_balance, caller:", inspect.stack()[1].function)
+    print("DEBUG: entered upstox_balance")
     url = 'https://api.upstox.com/v2/user/get-funds-and-margin'
     headers = {
         'Accept': 'application/json',
