@@ -480,11 +480,12 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                                 ar.angelone_trade_conditions_check(obj, auth_token, lots, target_pct, indicators_df, creds, name,strategy)
                             elif broker_name.lower() == "5paisa":
                                 fp.fivepaisa_trade_conditions_check(lots, target_pct, indicators_df, creds, stock,strategy)
+                            gevent.sleep(1)
         
                         except Exception as e:
                             logger.write(f"❌ Error running strategy for {symbol}: {e}")
         except Exception as e:
-        logger.write(f"❌ Trading loop crashed: {e}")
+            logger.write(f"❌ Trading loop crashed: {e}")
     logger.write("✅ Trading cycle complete")
     logger.write(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
     gevent.sleep(1)  # wait before next cycle
