@@ -19,28 +19,26 @@ def upstox_profile(access_token):
         'Accept': 'application/json',
         'Authorization': f'Bearer {access_token}'
     }
-    try:
-        response = requests.get(url, headers=headers)
-        print(f"Status Code: {response.status_code}")
-        if response.status_code == 200:
-            response_data = response.json()
-            print(response-data)
-            # Extract available_margin from equity section
-            if response_data.get('status') == 'success' and 'data' in response_data:
-                #profile = response_data['data']['equity']['available_margin']
-                profile = {'User ID': response_data.get('data')['user_id'],
-                           'User Name': response_data.get('data')['user_name'],
-                           'Email':response_data.get('data')['email']}
-                return profile
-            else:
-                logger.write("⚠️ Failed to retrieve balance: Invalid response structure")
-                return None
+   
+    response = requests.get(url, headers=headers)
+    print(f"Status Code: {response.status_code}")
+    if response.status_code == 200:
+        response_data = response.json()
+        print(response-data)
+        # Extract available_margin from equity section
+        if response_data.get('status') == 'success' and 'data' in response_data:
+            #profile = response_data['data']['equity']['available_margin']
+            profile = {'User ID': response_data.get('data')['user_id'],
+                       'User Name': response_data.get('data')['user_name'],
+                       'Email':response_data.get('data')['email']}
+            return profile
         else:
-            logger.write(f"🚨 API Error {response.status_code}: {response.text}")
+            logger.write("⚠️ Failed to retrieve balance: Invalid response structure")
             return None
-    except Exception as e:
-        logger.write(f"🚨 Exception in balance function: {e}")
-    return None
+    else:
+        logger.write(f"🚨 API Error {response.status_code}: {response.text}")
+        return None
+   
 
 def upstox_balance(access_token):
     print("DEBUG: entered upstox_balance")
@@ -51,27 +49,23 @@ def upstox_balance(access_token):
         'Authorization': f'Bearer {access_token}'
     }
 
-    try:
-        response = requests.get(url, headers=headers)
-        print(f"Status Code: {response.status_code}")
+    response = requests.get(url, headers=headers)
+    print(f"Status Code: {response.status_code}")
 
-        if response.status_code == 200:
-            response_data = response.json()
-            print(response_data)
-            # Extract available_margin from equity section
-            if response_data.get('status') == 'success' and 'data' in response_data:
-                #print(response_data['data']['equity'])
-                total_balance = response_data['data']['equity']['available_margin'] + response_data['data']['equity']['used_margin']
-                balance = {"Total Balance":total_balance, "Available Margin":response_data['data']['equity']['available_margin'],"Used Margin":response_data['data']['equity']['used_margin']}
-                return balance
-            else:
-                logger.write("⚠️ Failed to retrieve balance: Invalid response structure")
-                return None
+    if response.status_code == 200:
+        response_data = response.json()
+        print(response_data)
+        # Extract available_margin from equity section
+        if response_data.get('status') == 'success' and 'data' in response_data:
+            #print(response_data['data']['equity'])
+            total_balance = response_data['data']['equity']['available_margin'] + response_data['data']['equity']['used_margin']
+            balance = {"Total Balance":total_balance, "Available Margin":response_data['data']['equity']['available_margin'],"Used Margin":response_data['data']['equity']['used_margin']}
+            return balance
         else:
-            logger.write(f"🚨 API Error {response.status_code}: {response.text}")
+            logger.write("⚠️ Failed to retrieve balance: Invalid response structure")
             return None
-    except Exception as e:
-        logger.write(f"🚨 Exception in balance function: {e}")
+    else:
+        logger.write(f"🚨 API Error {response.status_code}: {response.text}")
         return None
 
 def upstox_instrument_key(name):
