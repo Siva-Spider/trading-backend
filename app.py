@@ -481,10 +481,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                     logger.write(f"❌ Error running strategy for {symbol}: {e}")
 
             logger.write("✅ Trading cycle complete")
-<<<<<<< HEAD
-=======
             logger.write(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
->>>>>>> 954995cc745c95bf8f5834e85b538ecaf160781a
             gevent.sleep(1)  # wait before next cycle
 
 # === START ALL TRADING ===
