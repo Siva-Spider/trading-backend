@@ -9,6 +9,7 @@ import os
 import datetime
 import pytz
 import time
+import gevent
 from tabulate import tabulate
 from kiteconnect import KiteConnect
 from logger_module import logger
@@ -16,7 +17,11 @@ from logger_module import logger
 app = Flask(__name__)
 CORS(app)
 
+<<<<<<< HEAD
+@app.route("/")
+=======
 app.route("/", methods=["GET"])
+>>>>>>> 954995cc745c95bf8f5834e85b538ecaf160781a
 def home():
     return {"status": "Backend is running 🚀"}
 
@@ -477,7 +482,10 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                     logger.write(f"❌ Error running strategy for {symbol}: {e}")
 
             logger.write("✅ Trading cycle complete")
+<<<<<<< HEAD
+=======
             logger.write(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
+>>>>>>> 954995cc745c95bf8f5834e85b538ecaf160781a
             gevent.sleep(1)  # wait before next cycle
 
 # === START ALL TRADING ===
