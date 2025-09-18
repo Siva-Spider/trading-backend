@@ -13,6 +13,7 @@ from logger_module import logger
 instruments = pd.read_csv("https://assets.upstox.com/market-quote/instruments/exchange/complete.csv.gz")
 
 def upstox_profile(access_token):
+    print(access_token)
     url = 'https://api.upstox.com/v2/user/profile'
     headers = {
         'Accept': 'application/json',
