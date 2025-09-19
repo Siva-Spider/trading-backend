@@ -22,7 +22,7 @@ def upstox_profile(access_token):
     }
     print("2")
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         #print(f"Status Code: {response.status_code}")
         if response.status_code == 200:
             response_data = response.json()
@@ -55,7 +55,7 @@ def upstox_balance(access_token):
     }
 
     try:
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         #print(f"Status Code: {response.status_code}")
 
         if response.status_code == 200:
