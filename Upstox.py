@@ -22,7 +22,7 @@ def upstox_profile(access_token):
     }
     print("2")
     retry=2
-    while retry >0
+    while retry > 0:
         response = requests.get(url, headers=headers)
         retry --
     print(f"Status Code: {response.status_code}")
