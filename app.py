@@ -348,10 +348,12 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
         except Exception as e:
             logger.write(f"❌ Error fetching instrument key for {symbol}: {e}")
             active_trades[stock['symbol']] = False
-
+        print("1")
         # setup time intervals
         interval = trading_parameters[0].get("interval", "1minute")
+        print("2")
         now_interval, next_interval = nni.round_to_next_interval(interval)
+        print("3")
         print(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
         # loop until all stocks disconnected
         while any(active_trades.values()):
