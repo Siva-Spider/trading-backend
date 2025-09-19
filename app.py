@@ -1,3 +1,6 @@
+import gevent
+monkey.patch_all()
+
 from flask import Flask, request, jsonify, Response
 import threading
 from flask_cors import CORS
@@ -5,7 +8,6 @@ from logger_module import logger
 import os
 import datetime
 import time
-import gevent
 from tabulate import tabulate
 from kiteconnect import KiteConnect
 
