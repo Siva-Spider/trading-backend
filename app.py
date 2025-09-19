@@ -134,6 +134,7 @@ def connect_broker():
 
         try:
             if broker_name == "Upstox":
+                print(broker_name)
                 access_token = creds.get('access_token')
                 profile = us.upstox_profile(access_token)
                 balance = us.upstox_balance(access_token)
@@ -156,6 +157,7 @@ def connect_broker():
                     message = "Connection failed. Check your API key and access token."
 
             elif broker_name == "AngelOne":
+                print(broker_name)
                 api_key = creds.get('api_key')
                 user_id = creds.get('user_id')
                 pin = creds.get('pin')
