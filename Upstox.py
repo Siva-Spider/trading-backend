@@ -21,7 +21,10 @@ def upstox_profile(access_token):
         'Authorization': f'Bearer {access_token}'
     }
     print("2")
-    response = requests.get(url, headers=headers)
+    retry=2
+    while retry >0
+        response = requests.get(url, headers=headers)
+        retry --
     print(f"Status Code: {response.status_code}")
     print("3")
     if response.status_code == 200:
