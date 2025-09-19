@@ -24,7 +24,7 @@ def upstox_profile(access_token):
     retry=2
     while retry > 0:
         response = requests.get(url, headers=headers)
-        retry --
+        retry = retry-1
     print(f"Status Code: {response.status_code}")
     print("3")
     if response.status_code == 200:
