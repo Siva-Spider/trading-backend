@@ -119,8 +119,8 @@ def connect_broker():
     import Fivepaisa as fp
     
     data = request.get_json()
-    brokers_data = data.get('brokers', [])
-    selected_brokers = data.get("selectedBrokers", [])
+    #brokers_data = data.get('brokers', [])
+    selected_brokers = data.get("brokers", [])
     responses = []
     print(selected_brokers)
     for broker_item in selected_brokers:
