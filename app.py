@@ -112,12 +112,6 @@ def stream_logs():
 # === CONNECT BROKER ===
 @app.route('/api/connect-broker', methods=['POST'])
 def connect_broker():
-    import Upstox as us
-    import Zerodha as zr
-    import AngelOne as ar
-    import Groww as gr
-    import Fivepaisa as fp
-    
     data = request.get_json()
     #brokers_data = data.get('brokers', [])
     selected_brokers = data.get("brokers", [])
@@ -134,6 +128,7 @@ def connect_broker():
 
         try:
             if broker_name == "Upstox":
+                import Upstox as us
                 print(broker_name)
                 access_token = creds.get('access_token')
                 profile = us.upstox_profile(access_token)
@@ -146,6 +141,7 @@ def connect_broker():
                     message = "Connection failed. Check your access token."
 
             elif broker_name == "Zerodha":
+                import Zerodha as zr
                 api_key = creds.get('api_key')
                 access_token = creds.get('access_token')
                 profile = zr.zerodha_get_profile(api_key, access_token)
@@ -157,6 +153,7 @@ def connect_broker():
                     message = "Connection failed. Check your API key and access token."
 
             elif broker_name == "AngelOne":
+                import AngelOne as ar
                 print(broker_name)
                 api_key = creds.get('api_key')
                 user_id = creds.get('user_id')
@@ -176,6 +173,7 @@ def connect_broker():
                 else:
                     message = "Connection failed. Check your credentials."
             elif broker_name == "5paisa":
+                import Fivepaisa as fp
                 app_key = creds.get('app_key')
                 access_token = creds.get('access_token')
                 client_code = creds.get("client_id")
@@ -188,6 +186,7 @@ def connect_broker():
                 else:
                     message = "Connection failed. Check your API key and access token."
             elif broker_name == "Groww":
+                import Groww as gr
                 api_key = creds.get('api_key')
                 access_token = creds.get('access_token')
                 if api_key and access_token:
