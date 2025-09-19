@@ -122,15 +122,10 @@ def connect_broker():
     #brokers_data = data.get('brokers', [])
     selected_brokers = data.get("brokers", [])
     responses = []
-    print(selected_brokers)
     for broker_item in selected_brokers:
-        print(selected_brokers)
         broker_key = broker_item.get('name')
         creds = broker_item.get('credentials')
         broker_name = broker_map.get(broker_key)
-        print(broker_key)
-        print(creds)
-        print(broker_name)
 
         profile = None
         balance = None
@@ -140,7 +135,6 @@ def connect_broker():
         try:
             if broker_name == "Upstox":
                 access_token = creds.get('access_token')
-                print(access_token)
                 profile = us.upstox_profile(access_token)
                 balance = us.upstox_balance(access_token)
                 print(profile, balance)
