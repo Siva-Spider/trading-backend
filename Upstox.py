@@ -23,10 +23,12 @@ def upstox_profile(access_token):
     print("2")
     retry=2
     while retry > 0:
+        print("3")
         response = requests.get(url, headers=headers)
+        print(response)
         retry = retry-1
     print(f"Status Code: {response.status_code}")
-    print("3")
+    print("4")
     if response.status_code == 200:
         response_data = response.json()
         print(response-data)
