@@ -122,7 +122,7 @@ def connect_broker():
     brokers_data = data.get('brokers', [])
     selected_brokers = data.get("selectedBrokers", [])
     responses = []
-
+    print(selected_brokers)
     for broker_item in selected_brokers:
         print(selected_brokers)
         broker_key = broker_item.get('name')
