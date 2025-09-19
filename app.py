@@ -307,7 +307,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
         active_trades[stock['symbol']] = True
     logger.write("✅ Trading loop started for all selected stocks")
     logger.write("\n⏳ Starting new trading cycle setup...")
-
+    print(trading_parameters)
     # STEP 1: Fetch instrument keys once at the beginning
     for stock in trading_parameters:
         if not active_trades.get(stock['symbol']):
