@@ -15,13 +15,15 @@ instruments = pd.read_csv("https://assets.upstox.com/market-quote/instruments/ex
 def upstox_profile(access_token):
     print(access_token)
     url = 'https://api.upstox.com/v2/user/profile'
+    print("1")
     headers = {
         'Accept': 'application/json',
         'Authorization': f'Bearer {access_token}'
     }
-   
+    print("2")
     response = requests.get(url, headers=headers)
     print(f"Status Code: {response.status_code}")
+    print("3")
     if response.status_code == 200:
         response_data = response.json()
         print(response-data)
