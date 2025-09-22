@@ -301,7 +301,8 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
     import Next_Now_intervals as nni
     import combinding_dataframes as cdf
     import indicators as ind
-    
+
+    gr.print_name()
     # mark all as active initially
     for stock in trading_parameters:
         active_trades[stock['symbol']] = True
