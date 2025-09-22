@@ -343,6 +343,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
             if instrument_key:
                 stock['instrument_key'] = instrument_key
                 logger.write(f"✅ Found instrument key {instrument_key} for {symbol}")
+                gevent.sleep(1)
             else:
                 logger.write(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
                 active_trades[stock['symbol']] = False
@@ -358,6 +359,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
         print(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
         # loop until all stocks disconnected
         while any(active_trades.values()):
+            gevent.sleep(3)
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             if now >= next_interval:
                 interval = trading_parameters[0].get("interval", "1minute")
