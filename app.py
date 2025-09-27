@@ -525,7 +525,7 @@ def start_all_trading():
     # Run in background thread
     thread = threading.Thread(
         target=run_trading_logic_for_all,
-        args=(trading_parameters, selected_brokers, logger),
+        args=(trading_parameters, selected_brokers, LOG),
         daemon=True
     )
     thread.start()
