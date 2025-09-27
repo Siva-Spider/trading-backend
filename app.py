@@ -11,6 +11,7 @@ from logging.handlers import RotatingFileHandler
 import os
 import datetime
 import time
+import pytz
 from tabulate import tabulate
 from kiteconnect import KiteConnect
 import traceback
@@ -319,7 +320,7 @@ def find_positions_for_symbol(broker, symbol, credentials):
 
 # === TRADING LOOP FOR ALL STOCKS ===
 def run_trading_logic_for_all(trading_parameters, selected_brokers):
-    
+    IST_TIMEZONE = pytz.timezone('Asia/Kolkata')
     try:
         import Upstox as us
         import Zerodha as zr
@@ -388,7 +389,8 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
         # loop until all stocks disconnected
         while any(active_trades.values()):
             gevent.sleep(3)
-            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            now_ist = datetime.datetime.now(IST_TIMEZONE)
+            now = now_ist.strftime("%Y-%m-%d %H:%M:%S")
             LOG.info(f"Present time is: {now}")
             if now >= next_interval:
                 interval = trading_parameters[0].get("interval", "1minute")
