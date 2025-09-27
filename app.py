@@ -5,12 +5,43 @@ monkey.patch_all()
 from flask import Flask, request, jsonify, Response
 import threading
 from flask_cors import CORS
-from logger_module import logger
+#from logger_module import logger
+import logging
+from logging.handlers import RotatingFileHandler
 import os
 import datetime
 import time
 from tabulate import tabulate
 from kiteconnect import KiteConnect
+
+# --- 1. Custom Log Storage and Handler (REPLACEMENT for logger_module) ---
+class WebLogHandler(logging.Handler):
+    """A custom logging handler that stores log records in memory for web streaming."""
+    def __init__(self, log_list):
+        super().__init__()
+        self.log_list = log_list
+        self.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+    def emit(self, record):
+        """Formats and appends the log message to the shared list."""
+        self.log_list.append(self.format(record))
+
+# --- Central Log List and Setup ---
+# This list holds all logs to be streamed to the frontend
+SHARED_LOGS = []
+
+# Configure the root logger
+LOG = logging.getLogger()
+LOG.setLevel(logging.INFO)
+
+# Add the custom handler to the root logger
+web_handler = WebLogHandler(SHARED_LOGS)
+LOG.addHandler(web_handler)
+
+# Optional: Add a file handler for persistence
+file_handler = RotatingFileHandler('app.log', maxBytes=1024*1024*10, backupCount=5)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+LOG.addHandler(file_handler)
 
 app = Flask(__name__)
 CORS(app)
@@ -102,13 +133,15 @@ def stream_logs():
     def event_stream():
         last_index = 0
         while True:
-            if logger.logs:
-                # send any new logs
-                new_logs = logger.logs[last_index:]
+            # Reference the new SHARED_LOGS list
+            if len(SHARED_LOGS) > last_index:
+                new_logs = SHARED_LOGS[last_index:]
                 for log in new_logs:
+                    # SSE format: data: [message]\n\n
                     yield f"data: {log}\n\n"
                 last_index += len(new_logs)
-            gevent.sleep(1)  # avoid tight loop
+            
+            gevent.sleep(1) # Use gevent.sleep to yield control
 
     return Response(event_stream(), mimetype="text/event-stream")
 
@@ -306,8 +339,8 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
     # mark all as active initially
     for stock in trading_parameters:
         active_trades[stock['symbol']] = True
-    logger.write("✅ Trading loop started for all selected stocks")
-    logger.write("\n⏳ Starting new trading cycle setup...")
+    LOG.info("✅ Trading loop started for all selected stocks")
+    LOG.info("\n⏳ Starting new trading cycle setup...")
     print(trading_parameters)
     print(active_trades)
     # STEP 1: Fetch instrument keys once at the beginning
@@ -322,7 +355,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
         company = reverse_stock_map.get(symbol, " ")
         interval = stock.get('interval')
 
-        logger.write(f"🔑 Fetching instrument key for {company} ({symbol}) via {broker_name}...")
+        LOG.info(f"🔑 Fetching instrument key for {company} ({symbol}) via {broker_name}...")
         instrument_key = None
 
         try:
@@ -336,21 +369,21 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                     access_token = broker_info['credentials'].get("access_token")
                     instrument_key = zr.zerodha_instruments_token(api_key, access_token, symbol)
             elif broker_name.lower() == "angelone":
-               logger.write(company)
+               LOG.info(company)
                instrument_key = ar.angelone_get_token_by_name(symbol)
             elif broker_name.lower() == "5paisa":
                instrument_key = fp.fivepaisa_scripcode_fetch(symbol)
 
             if instrument_key:
                 stock['instrument_key'] = instrument_key
-                logger.write(f"✅ Found instrument key {instrument_key} for {symbol}")
+                LOG.info(f"✅ Found instrument key {instrument_key} for {symbol}")
                 jsonify({"message": f"✅ Found instrument key {instrument_key} for {symbol}"})
                 gevent.sleep(1)
             else:
-                logger.write(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
+                LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
                 active_trades[stock['symbol']] = False
         except Exception as e:
-            logger.write(f"❌ Error fetching instrument key for {symbol}: {e}")
+            LOG.error(f"❌ Error fetching instrument key for {symbol}: {e}")
             active_trades[stock['symbol']] = False
         print("1")
         # setup time intervals
@@ -379,7 +412,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                     interval = stock.get('interval')
                     instrument_key = stock.get('instrument_key')
     
-                    logger.write(f"🕯 Fetching candles for {symbol}-{company} from {broker_name}")
+                    LOG.info(f"🕯 Fetching candles for {symbol}-{company} from {broker_name}")
     
                     combined_df = None
                     try:
@@ -426,13 +459,13 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                                 combined_df = fp.fivepaisa_historical_data_fetch(access_token, instrument_key, interval,25)
     
                     except Exception as e:
-                        logger.write(f"❌ Error fetching data for {symbol}: {e}")
+                        LOG.error(f"❌ Error fetching data for {symbol}: {e}")
     
                     if combined_df is None or combined_df.empty:
-                        logger.write(f"❌ No data for {symbol}, skipping.")
+                        LOG.error(f"❌ No data for {symbol}, skipping.")
                         continue
     
-                    logger.write(f"✅ Data ready for {symbol}")
+                    LOG.info(f"✅ Data ready for {symbol}")
                     gevent.sleep(0.5)
                     indicators_df = ind.all_indicators(combined_df)
                     row = indicators_df.tail(1).iloc[0]
@@ -444,15 +477,15 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                     header = "|" + "|".join([f"{c:^{w}}" for c, w in zip(cols, col_widths)]) + "|"
                     values = "|" + "|".join([f"{str(row[c]):^{w}}" for c, w in zip(cols, col_widths)]) + "|"
                     # --- log it line by line ---
-                    logger.write(line())
-                    logger.write(header)
-                    logger.write(line())
-                    logger.write(values)
-                    logger.write(line())
-                    #logger.write(tabulate(indicators_df.tail(1), headers="keys", tablefmt="pretty", showindex=False))
+                    LOG.info(line())
+                    LOG.info(header)
+                    LOG.info(line())
+                    LOG.info(values)
+                    LOG.info(line())
+                    #LOG.info(tabulate(indicators_df.tail(1), headers="keys", tablefmt="pretty", showindex=False))
     
                     # STEP 3: Check trade conditions
-                    logger.write(f"📊 Checking trade conditions for {symbol}")
+                    LOG.info(f"📊 Checking trade conditions for {symbol}")
                     lots = stock.get("lots")
                     target_pct = stock.get("target_percentage")
                     name = stock.get("symbol")
@@ -475,9 +508,9 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
                             fp.fivepaisa_trade_conditions_check(lots, target_pct, indicators_df, creds, stock,strategy)
     
                     except Exception as e:
-                        logger.write(f"❌ Error running strategy for {symbol}: {e}")
+                        LOG.error(f"❌ Error running strategy for {symbol}: {e}")
     
-                logger.write("✅ Trading cycle complete")
+                LOG.info("✅ Trading cycle complete")
                 gevent.sleep(1)  # wait before next cycle
 
 # === START ALL TRADING ===
