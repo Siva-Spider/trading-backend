@@ -330,7 +330,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
         import combinding_dataframes as cdf
         import indicators as ind
         if not trading_parameters:
-            LOG.waring("❌ Trading loop aborted: Received empty trading parameters list.")
+            LOG.warning("❌ Trading loop aborted: Received empty trading parameters list.")
             return 
             
         # mark all as active initially
@@ -378,13 +378,13 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
                 LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
                 active_trades[stock['symbol']] = False
                     
-        print("1")
+        LOG.info("1")
         # setup time intervals
         interval = trading_parameters[0].get("interval", "1minute")
-        print("2")
+        LOG.info("2")
         now_interval, next_interval = nni.round_to_next_interval(interval)
-        print("3")
-        print(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
+        LOG.info("3")
+        LOG.info(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
         # loop until all stocks disconnected
         while any(active_trades.values()):
             gevent.sleep(3)
