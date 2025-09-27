@@ -327,7 +327,11 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
     import combinding_dataframes as cdf
     import indicators as ind
 
-    gr.print_name()
+    if not trading_parameters:
+        logger.write("❌ Trading loop aborted: Received empty trading parameters list.")
+        # Ensure logger is available globally or passed correctly
+        return # Exit the thread gracefully
+        
     # mark all as active initially
     for stock in trading_parameters:
         active_trades[stock['symbol']] = True
