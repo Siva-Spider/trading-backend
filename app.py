@@ -13,6 +13,7 @@ import datetime
 import time
 from tabulate import tabulate
 from kiteconnect import KiteConnect
+import traceback
 
 # --- 1. Custom Log Storage and Handler (REPLACEMENT for logger_module) ---
 class WebLogHandler(logging.Handler):
