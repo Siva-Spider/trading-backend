@@ -507,13 +507,13 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
         
                     LOG.info("✅ Trading cycle complete")
                     gevent.sleep(1)  # wait before next cycle
-                except Exception as e:
-                    # 🚨 CRITICAL: Log the full traceback if a crash occurs
-                    error_msg = f"🚨 FATAL CRASH in background trading thread: {e}\n"
-                    full_trace = traceback.format_exc()
-                    
-                    # Use the LOG (or logger) to write the full trace
-                    LOG.error(error_msg + full_trace) # Assuming you are using the logging setup from snippet 2
+        except Exception as e:
+            # 🚨 CRITICAL: Log the full traceback if a crash occurs
+            error_msg = f"🚨 FATAL CRASH in background trading thread: {e}\n"
+            full_trace = traceback.format_exc()
+            
+            # Use the LOG (or logger) to write the full trace
+            LOG.error(error_msg + full_trace) # Assuming you are using the logging setup from snippet 2
 
 # === START ALL TRADING ===
 @app.route('/api/start-all-trading', methods=['POST'])
