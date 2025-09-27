@@ -317,7 +317,7 @@ def find_positions_for_symbol(broker, symbol, credentials):
         return []
 
 # === TRADING LOOP FOR ALL STOCKS ===
-def run_trading_logic_for_all(trading_parameters, selected_brokers,LOG):
+def run_trading_logic_for_all(trading_parameters, selected_brokers):
     import Upstox as us
     import Zerodha as zr
     import AngelOne as ar
@@ -524,7 +524,7 @@ def start_all_trading():
     # Run in background thread
     thread = threading.Thread(
         target=run_trading_logic_for_all,
-        args=(trading_parameters, selected_brokers, LOG),
+        args=(trading_parameters, selected_brokers),
         daemon=True
     )
     thread.start()
