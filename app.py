@@ -389,10 +389,12 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
         while any(active_trades.values()):
             gevent.sleep(3)
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            LOG.info(f"Present time is: {now}")
             if now >= next_interval:
                 interval = trading_parameters[0].get("interval", "1minute")
                 now_interval, next_interval = nni.round_to_next_interval(interval)
-    
+                LOG.info(trading_parameters)
+                
                 # STEP 2: Fetch data + indicators
                 for stock in trading_parameters:
                     symbol = stock.get('symbol')
