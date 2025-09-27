@@ -354,32 +354,29 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
             LOG.info(f"🔑 Fetching instrument key for {company} ({symbol}) via {broker_name}...")
             instrument_key = None
     
-            try:
-                if broker_name.lower() == "upstox":
-                    instrument_key = us.upstox_instrument_key(company)
-    
-                elif broker_name.lower() == "zerodha":
-                    broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
-                    if broker_info:
-                        api_key = broker_info['credentials'].get("api_key")
-                        access_token = broker_info['credentials'].get("access_token")
-                        instrument_key = zr.zerodha_instruments_token(api_key, access_token, symbol)
-                elif broker_name.lower() == "angelone":
-                   LOG.info(company)
-                   instrument_key = ar.angelone_get_token_by_name(symbol)
-                elif broker_name.lower() == "5paisa":
-                   instrument_key = fp.fivepaisa_scripcode_fetch(symbol)
-    
-                if instrument_key:
-                    stock['instrument_key'] = instrument_key
-                    LOG.info(f"✅ Found instrument key {instrument_key} for {symbol}")
-                    gevent.sleep(1)
-                else:
-                    LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
-                    active_trades[stock['symbol']] = False
-            except Exception as e:
-                LOG.error(f"❌ Error fetching instrument key for {symbol}: {e}")
+            if broker_name.lower() == "upstox":
+                instrument_key = us.upstox_instrument_key(company)
+
+            elif broker_name.lower() == "zerodha":
+                broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
+                if broker_info:
+                    api_key = broker_info['credentials'].get("api_key")
+                    access_token = broker_info['credentials'].get("access_token")
+                    instrument_key = zr.zerodha_instruments_token(api_key, access_token, symbol)
+            elif broker_name.lower() == "angelone":
+               LOG.info(company)
+               instrument_key = ar.angelone_get_token_by_name(symbol)
+            elif broker_name.lower() == "5paisa":
+               instrument_key = fp.fivepaisa_scripcode_fetch(symbol)
+
+            if instrument_key:
+                stock['instrument_key'] = instrument_key
+                LOG.info(f"✅ Found instrument key {instrument_key} for {symbol}")
+                gevent.sleep(1)
+            else:
+                LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
                 active_trades[stock['symbol']] = False
+                    
             print("1")
             # setup time intervals
             interval = trading_parameters[0].get("interval", "1minute")
