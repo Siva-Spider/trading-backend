@@ -372,7 +372,6 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers,LOG):
                 if instrument_key:
                     stock['instrument_key'] = instrument_key
                     LOG.info(f"✅ Found instrument key {instrument_key} for {symbol}")
-                    jsonify({"message": f"✅ Found instrument key {instrument_key} for {symbol}"})
                     gevent.sleep(1)
                 else:
                     LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
