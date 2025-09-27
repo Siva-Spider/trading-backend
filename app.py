@@ -120,14 +120,6 @@ trade_logs = []
 active_trades = {}   # { "NIFTY": True, "RELIANCE": False }
 broker_sessions = {}
 
-def log_stream():
-    yield "data: 🟢 Trading started...\n\n"
-    for i in range(1, 11):
-        yield f"data: 🔔 Trade signal {i} at {time.strftime('%H:%M:%S')}\n\n"
-        gevent.sleep(2)
-    yield "data: ✅ Trading finished.\n\n"
-
-
 @app.route("/api/stream-logs")
 def stream_logs():
     def event_stream():
