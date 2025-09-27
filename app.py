@@ -319,15 +319,16 @@ def find_positions_for_symbol(broker, symbol, credentials):
 
 # === TRADING LOOP FOR ALL STOCKS ===
 def run_trading_logic_for_all(trading_parameters, selected_brokers):
-    import Upstox as us
-    import Zerodha as zr
-    import AngelOne as ar
-    import Groww as gr
-    import Fivepaisa as fp
-    import Next_Now_intervals as nni
-    import combinding_dataframes as cdf
-    import indicators as ind
+    
     try:
+        import Upstox as us
+        import Zerodha as zr
+        import AngelOne as ar
+        import Groww as gr
+        import Fivepaisa as fp
+        import Next_Now_intervals as nni
+        import combinding_dataframes as cdf
+        import indicators as ind
         if not trading_parameters:
             LOG.waring("❌ Trading loop aborted: Received empty trading parameters list.")
             return 
