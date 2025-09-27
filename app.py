@@ -317,7 +317,7 @@ def find_positions_for_symbol(broker, symbol, credentials):
         return []
 
 # === TRADING LOOP FOR ALL STOCKS ===
-def run_trading_logic_for_all(trading_parameters, selected_brokers,logger):
+def run_trading_logic_for_all(trading_parameters, selected_brokers,LOG):
     import Upstox as us
     import Zerodha as zr
     import AngelOne as ar
