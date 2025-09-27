@@ -378,133 +378,133 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
                 LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
                 active_trades[stock['symbol']] = False
                     
-            print("1")
-            # setup time intervals
-            interval = trading_parameters[0].get("interval", "1minute")
-            print("2")
-            now_interval, next_interval = nni.round_to_next_interval(interval)
-            print("3")
-            print(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
-            # loop until all stocks disconnected
-            while any(active_trades.values()):
-                gevent.sleep(3)
-                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                if now >= next_interval:
-                    interval = trading_parameters[0].get("interval", "1minute")
-                    now_interval, next_interval = nni.round_to_next_interval(interval)
-        
-                    # STEP 2: Fetch data + indicators
-                    for stock in trading_parameters:
-                        symbol = stock.get('symbol')
-                        if symbol not in active_trades:  # <-- skip if removed
-                            continue
-        
-                        broker_key = stock.get('broker')
-                        broker_name = broker_map.get(broker_key)
-                        company = reverse_stock_map.get(symbol, " ")
-                        interval = stock.get('interval')
-                        instrument_key = stock.get('instrument_key')
-        
-                        LOG.info(f"🕯 Fetching candles for {symbol}-{company} from {broker_name}")
-        
-                        combined_df = None
-                        try:
-                            if broker_name.lower() == "upstox":
-                                access_token = next((b['credentials']['access_token'] for b in selected_brokers if b['name'] == broker_key),
-                                    None
-                                )
-                                if access_token:
-                                    hdf = us.upstox_fetch_historical_data_with_retry(access_token, instrument_key, interval)
-                                    idf = us.upstox_fetch_intraday_data(access_token, instrument_key, interval)
-                                    if hdf is not None and idf is not None:
-                                        combined_df = cdf.combinding_dataframes(hdf, idf)
-        
-                            elif broker_name.lower() == "zerodha":
-                                broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
-                                if broker_info:
-                                    kite = KiteConnect(broker_info['credentials'].get("api_key"))
-                                    kite.set_access_token(broker_info['credentials'].get("access_token"))
-                                    if interval == "1":
-                                        interval = ""
-                                    hdf = zr.zerodha_historical_data(kite, instrument_key, interval)
-                                    idf = zr.zerodha_intraday_data(kite, instrument_key, interval)
-                                    if hdf is not None and idf is not None:
-                                        combined_df = cdf.combinding_dataframes(hdf, idf)
-                            elif broker_name.lower() == "angelone":
-                                broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
-                                if broker_info:
-                                    api_key = broker_info['credentials'].get("api_key")
-                                    user_id = broker_info['credentials'].get("user_id")
-                                    pin = broker_info['credentials'].get("pin")
-                                    totp_secret = broker_info['credentials'].get("totp_secret")
-                                    session = broker_sessions.get(broker_name)
-                                    if not session:
-                                        return jsonify({"status": "failed", "message": "Broker not connected."})
-                                    obj = session["obj"]
-                                    auth_token = session["auth_token"]
-                                    interval = ar.number_to_interval(interval)
-                                    combined_df = ar.angelone_get_historical_data(api_key,auth_token, obj,"NSE", instrument_key, interval)
-                            elif broker_name.lower() == "5paisa":
-                                broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
-                                if broker_info:
-                                    app_key = broker_info['credentials'].get("app_key")
-                                    access_token = broker_info['credentials'].get("access_token")
-                                    combined_df = fp.fivepaisa_historical_data_fetch(access_token, instrument_key, interval,25)
-        
-                        except Exception as e:
-                            LOG.error(f"❌ Error fetching data for {symbol}: {e}")
-        
-                        if combined_df is None or combined_df.empty:
-                            LOG.error(f"❌ No data for {symbol}, skipping.")
-                            continue
-        
-                        LOG.info(f"✅ Data ready for {symbol}")
-                        gevent.sleep(0.5)
-                        indicators_df = ind.all_indicators(combined_df)
-                        row = indicators_df.tail(1).iloc[0]
-                        cols = indicators_df.columns.tolist()
-                        col_widths = [max(len(str(c)), len(str(row[c]))) + 2 for c in cols]
-                        def line():
-                            return "+" + "+".join(["-" * w for w in col_widths]) + "+"
-        
-                        header = "|" + "|".join([f"{c:^{w}}" for c, w in zip(cols, col_widths)]) + "|"
-                        values = "|" + "|".join([f"{str(row[c]):^{w}}" for c, w in zip(cols, col_widths)]) + "|"
-                        # --- log it line by line ---
-                        LOG.info(line())
-                        LOG.info(header)
-                        LOG.info(line())
-                        LOG.info(values)
-                        LOG.info(line())
-                        #LOG.info(tabulate(indicators_df.tail(1), headers="keys", tablefmt="pretty", showindex=False))
-        
-                        # STEP 3: Check trade conditions
-                        LOG.info(f"📊 Checking trade conditions for {symbol}")
-                        lots = stock.get("lots")
-                        target_pct = stock.get("target_percentage")
-                        name = stock.get("symbol")
-        
-                        try:
-                            creds = next((b["credentials"] for b in selected_brokers if b["name"] == broker_key), None)
-                            if broker_name.lower() == "upstox":
-                                us.upstox_trade_conditions_check(lots, target_pct, indicators_df.tail(1), creds, company,strategy)
-                            elif broker_name.lower() == "zerodha":
-                                zr.zerodha_trade_conditions_check(lots, target_pct, indicators_df.tail(1), creds, symbol,strategy)
-                            elif broker_name.lower() == "angelone":
+        print("1")
+        # setup time intervals
+        interval = trading_parameters[0].get("interval", "1minute")
+        print("2")
+        now_interval, next_interval = nni.round_to_next_interval(interval)
+        print("3")
+        print(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
+        # loop until all stocks disconnected
+        while any(active_trades.values()):
+            gevent.sleep(3)
+            now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            if now >= next_interval:
+                interval = trading_parameters[0].get("interval", "1minute")
+                now_interval, next_interval = nni.round_to_next_interval(interval)
+    
+                # STEP 2: Fetch data + indicators
+                for stock in trading_parameters:
+                    symbol = stock.get('symbol')
+                    if symbol not in active_trades:  # <-- skip if removed
+                        continue
+    
+                    broker_key = stock.get('broker')
+                    broker_name = broker_map.get(broker_key)
+                    company = reverse_stock_map.get(symbol, " ")
+                    interval = stock.get('interval')
+                    instrument_key = stock.get('instrument_key')
+    
+                    LOG.info(f"🕯 Fetching candles for {symbol}-{company} from {broker_name}")
+    
+                    combined_df = None
+                    try:
+                        if broker_name.lower() == "upstox":
+                            access_token = next((b['credentials']['access_token'] for b in selected_brokers if b['name'] == broker_key),
+                                None
+                            )
+                            if access_token:
+                                hdf = us.upstox_fetch_historical_data_with_retry(access_token, instrument_key, interval)
+                                idf = us.upstox_fetch_intraday_data(access_token, instrument_key, interval)
+                                if hdf is not None and idf is not None:
+                                    combined_df = cdf.combinding_dataframes(hdf, idf)
+    
+                        elif broker_name.lower() == "zerodha":
+                            broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
+                            if broker_info:
+                                kite = KiteConnect(broker_info['credentials'].get("api_key"))
+                                kite.set_access_token(broker_info['credentials'].get("access_token"))
+                                if interval == "1":
+                                    interval = ""
+                                hdf = zr.zerodha_historical_data(kite, instrument_key, interval)
+                                idf = zr.zerodha_intraday_data(kite, instrument_key, interval)
+                                if hdf is not None and idf is not None:
+                                    combined_df = cdf.combinding_dataframes(hdf, idf)
+                        elif broker_name.lower() == "angelone":
+                            broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
+                            if broker_info:
+                                api_key = broker_info['credentials'].get("api_key")
+                                user_id = broker_info['credentials'].get("user_id")
+                                pin = broker_info['credentials'].get("pin")
+                                totp_secret = broker_info['credentials'].get("totp_secret")
                                 session = broker_sessions.get(broker_name)
                                 if not session:
                                     return jsonify({"status": "failed", "message": "Broker not connected."})
                                 obj = session["obj"]
                                 auth_token = session["auth_token"]
                                 interval = ar.number_to_interval(interval)
-                                ar.angelone_trade_conditions_check(obj, auth_token, lots, target_pct, indicators_df, creds, name,strategy)
-                            elif broker_name.lower() == "5paisa":
-                                fp.fivepaisa_trade_conditions_check(lots, target_pct, indicators_df, creds, stock,strategy)
-        
-                        except Exception as e:
-                            LOG.error(f"❌ Error running strategy for {symbol}: {e}")
-        
-                    LOG.info("✅ Trading cycle complete")
-                    gevent.sleep(1)  # wait before next cycle
+                                combined_df = ar.angelone_get_historical_data(api_key,auth_token, obj,"NSE", instrument_key, interval)
+                        elif broker_name.lower() == "5paisa":
+                            broker_info = next((b for b in selected_brokers if b['name'] == broker_key), None)
+                            if broker_info:
+                                app_key = broker_info['credentials'].get("app_key")
+                                access_token = broker_info['credentials'].get("access_token")
+                                combined_df = fp.fivepaisa_historical_data_fetch(access_token, instrument_key, interval,25)
+    
+                    except Exception as e:
+                        LOG.error(f"❌ Error fetching data for {symbol}: {e}")
+    
+                    if combined_df is None or combined_df.empty:
+                        LOG.error(f"❌ No data for {symbol}, skipping.")
+                        continue
+    
+                    LOG.info(f"✅ Data ready for {symbol}")
+                    gevent.sleep(0.5)
+                    indicators_df = ind.all_indicators(combined_df)
+                    row = indicators_df.tail(1).iloc[0]
+                    cols = indicators_df.columns.tolist()
+                    col_widths = [max(len(str(c)), len(str(row[c]))) + 2 for c in cols]
+                    def line():
+                        return "+" + "+".join(["-" * w for w in col_widths]) + "+"
+    
+                    header = "|" + "|".join([f"{c:^{w}}" for c, w in zip(cols, col_widths)]) + "|"
+                    values = "|" + "|".join([f"{str(row[c]):^{w}}" for c, w in zip(cols, col_widths)]) + "|"
+                    # --- log it line by line ---
+                    LOG.info(line())
+                    LOG.info(header)
+                    LOG.info(line())
+                    LOG.info(values)
+                    LOG.info(line())
+                    #LOG.info(tabulate(indicators_df.tail(1), headers="keys", tablefmt="pretty", showindex=False))
+    
+                    # STEP 3: Check trade conditions
+                    LOG.info(f"📊 Checking trade conditions for {symbol}")
+                    lots = stock.get("lots")
+                    target_pct = stock.get("target_percentage")
+                    name = stock.get("symbol")
+    
+                    try:
+                        creds = next((b["credentials"] for b in selected_brokers if b["name"] == broker_key), None)
+                        if broker_name.lower() == "upstox":
+                            us.upstox_trade_conditions_check(lots, target_pct, indicators_df.tail(1), creds, company,strategy)
+                        elif broker_name.lower() == "zerodha":
+                            zr.zerodha_trade_conditions_check(lots, target_pct, indicators_df.tail(1), creds, symbol,strategy)
+                        elif broker_name.lower() == "angelone":
+                            session = broker_sessions.get(broker_name)
+                            if not session:
+                                return jsonify({"status": "failed", "message": "Broker not connected."})
+                            obj = session["obj"]
+                            auth_token = session["auth_token"]
+                            interval = ar.number_to_interval(interval)
+                            ar.angelone_trade_conditions_check(obj, auth_token, lots, target_pct, indicators_df, creds, name,strategy)
+                        elif broker_name.lower() == "5paisa":
+                            fp.fivepaisa_trade_conditions_check(lots, target_pct, indicators_df, creds, stock,strategy)
+    
+                    except Exception as e:
+                        LOG.error(f"❌ Error running strategy for {symbol}: {e}")
+    
+                LOG.info("✅ Trading cycle complete")
+                gevent.sleep(1)  # wait before next cycle
     except Exception as e:
         # 🚨 CRITICAL: Log the full traceback if a crash occurs
         error_msg = f"🚨 FATAL CRASH in background trading thread: {e}\n"
