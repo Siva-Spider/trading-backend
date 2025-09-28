@@ -6,6 +6,7 @@ import pandas as pd
 import logging
 from io import StringIO
 
+LOG = logging.getLogger(__name__)
 
 def fivepaisa_get_balance(app_key, access_token, client_code):
 
