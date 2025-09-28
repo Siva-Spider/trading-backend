@@ -2,7 +2,8 @@ import requests
 from tabulate import tabulate
 import datetime
 import pandas as pd
-from logger_module import logger
+#from logger_module import logger
+import logging
 from io import StringIO
 
 
@@ -27,7 +28,7 @@ def fivepaisa_get_balance(app_key, access_token, client_code):
         balance = {"Available Margin": balance_data['body']['EquityMargin'][0]['NetAvailableMargin']}
         return balance
     else:
-        logger.write(f"Error: {response.status_code} - {response.text}")
+        LOG.error(f"Error: {response.status_code} - {response.text}")
         return None
 
 def fivepaisa_scripcode_fetch(name):
@@ -43,7 +44,7 @@ def fivepaisa_scripcode_fetch(name):
 
     if not result.empty:
         scrip_code = result.iloc[0]["ScripCode"]
-        logger.write(f"ScripCode for {name} (NSE) is: {scrip_code}")
+        LOG.info(f"ScripCode for {name} (NSE) is: {scrip_code}")
         return scrip_code
     else:
         print(f"No match found for {name} in NSE")
@@ -110,7 +111,7 @@ def fivepaisa_fetch_positions(app_key, access_token, client_code):
         net_positions = positions_data['body']['NetPositionDetail']
         return net_positions
     else:
-        logger.write(f"Error: {response.status_code} - {response.text}")
+        LOG.error(f"Error: {response.status_code} - {response.text}")
         return None
 
 def fivepaisa_historical_data_fetch(access_token, scripCode, interval,days):
@@ -140,10 +141,10 @@ def fivepaisa_historical_data_fetch(access_token, scripCode, interval,days):
       df.set_index("dateTime", inplace=True)
       return df
     else:
-      logger.write("❌ No candle data found in response.")
+      LOG.warning("❌ No candle data found in response.")
       return pd.DataFrame()
   else:
-    logger.write(f"❌ Error: {resp.status_code} - {resp.text}")
+    LOG.error(f"❌ Error: {resp.status_code} - {resp.text}")
     return pd.DataFrame()
 
 def fivepaisa_close_position(credentials, pos):
@@ -181,9 +182,9 @@ def fivepaisa_close_position(credentials, pos):
     resp = requests.post(url, headers=headers, json=payload)
 
     if resp.status_code == 200:
-        logger.write(resp.json())
+        LOG.info(resp.json())
     else:
-        logger.write("Error:", resp.status_code, resp.text)
+        LOG.error("Error:", resp.status_code, resp.text)
 
 def fivepaisa_place_single_order(access_token, scripCode, user_key, scrip_data, price, quantity, order_type):
     url = "https://Openapi.5paisa.com/VendorsAPI/Service1.svc/V1/PlaceOrderRequest"
@@ -216,9 +217,9 @@ def fivepaisa_place_single_order(access_token, scripCode, user_key, scrip_data, 
     resp = requests.post(url, headers=headers, json=payload)
 
     if resp.status_code == 200:
-        logger.write(resp.json())
+        LOG.info(resp.json())
     else:
-        logger.write("Error:", resp.status_code, resp.text)
+        LOG.error("Error:", resp.status_code, resp.text)
 
 def fivepaisa_place_bracket_order(access_token, scripCode, user_key, scrip_data, price, quantity, order_type, target):
     url = "https://Openapi.5paisa.com/VendorsAPI/Service1.svc/V1/PlaceOrderRequest"
@@ -253,9 +254,9 @@ def fivepaisa_place_bracket_order(access_token, scripCode, user_key, scrip_data,
     resp = requests.post(url, headers=headers, json=payload)
 
     if resp.status_code == 200:
-        logger.write(resp.json())
+        LOG.info(resp.json())
     else:
-        logger.write("Error:", resp.status_code, resp.text)
+        LOG.error("Error:", resp.status_code, resp.text)
 
 def format_option_name(option_str: str) -> str:
     parts = option_str.split()
@@ -327,7 +328,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
 
         positions = fivepaisa_fetch_positions(user_key, access_token, client_code)
         if latest_adx > latest_adxema and latest_willr > -30 and latest_supertrend < close_price and latest_macd > latest_macd_signal:
-            logger.write("🔼 BUY SIGNAL GENERATED")
+            LOG.info("🔼 BUY SIGNAL GENERATED")
             if positions:
                 count = 0
                 for pos in positions:
@@ -336,7 +337,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
                         tradingsymbol = pos['tradingsymbol']
                         option_type = tradingsymbol[-2:]
                         if option_type == "CE":
-                            logger.write(
+                            LOG.info(
                                 f"The existing position is type CE with symbol {tradingsymbol}. No new CALL trade placed ")
                     else:
                         count += 1
@@ -346,7 +347,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
                 fivepaisa_fetch_option_data(access_token, user_key, stock, close_price, tgt, lots, "CE")
 
         elif latest_adx > latest_adxema and latest_willr < -70 and latest_supertrend > close_price and latest_macd < latest_macd_signal:
-            logger.write("🔽 SELL SIGNAL GENERATED")
+            LOG.info("🔽 SELL SIGNAL GENERATED")
             if positions:
                 for pos in positions:
                     quantity = pos['quantity']
@@ -354,12 +355,12 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
                         tradingsymbol = pos['tradingsymbol']
                         option_type = tradingsymbol[-2:]
                         if option_type == "PE":
-                            logger.write(f"The existing position is type PE with symbol {tradingsymbol}. No new PUT trade placed ")
+                            LOG.info(f"The existing position is type PE with symbol {tradingsymbol}. No new PUT trade placed ")
                         fivepaisa_fetch_option_data(access_token, user_key, stock, close_price, tgt, lots,"PE")
             else:
                 fivepaisa_fetch_option_data(access_token, user_key, stock, close_price, tgt, lots, "PE")
         else:
-            logger.write("⏸️ NO TRADE SIGNAL GENERATED")
+            LOG.info("⏸️ NO TRADE SIGNAL GENERATED")
 
     elif strategy == "Ema10_Ema20_Supertrend":
         # ✅ Check for signal
@@ -386,7 +387,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
 
         positions = fivepaisa_fetch_positions(user_key, access_token, client_code)
         if latest_Ema10 > latest_Ema20 and latest_supertrend < close_price:
-            logger.write("🔼 BUY SIGNAL GENERATED")
+            LOG.info("🔼 BUY SIGNAL GENERATED")
             if positions:
                 count = 0
                 for pos in positions:
@@ -395,7 +396,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
                         tradingsymbol = pos['tradingsymbol']
                         option_type = tradingsymbol[-2:]
                         if option_type == "CE":
-                            logger.write(f"The existing position is type CE with symbol {tradingsymbol}. No new CALL trade placed ")
+                            LOG.info(f"The existing position is type CE with symbol {tradingsymbol}. No new CALL trade placed ")
                     else:
                         count += 1
                         if count == 1:
@@ -404,7 +405,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
                 fivepaisa_fetch_option_data(access_token, user_key, stock, close_price, tgt, lots, "CE")
 
         elif latest_Ema10 < latest_Ema20 or latest_supertrend > close_price:
-            logger.write("🔽 SELL SIGNAL GENERATED")
+            LOG.info("🔽 SELL SIGNAL GENERATED")
             if positions:
                 count = 0
                 for pos in positions:
@@ -413,7 +414,7 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
                         tradingsymbol = pos['tradingsymbol']
                         option_type = tradingsymbol[-2:]
                         if option_type == "PE":
-                            logger.write(f"The existing position is type PE with symbol {tradingsymbol}. No new PUT trade placed ")
+                            LOG.info(f"The existing position is type PE with symbol {tradingsymbol}. No new PUT trade placed ")
                     else:
                         count += 1
                         if count == 1:
@@ -421,4 +422,4 @@ def fivepaisa_trade_conditions_check(lots, tgt, indicators_df, credentials, stoc
             else:
                 fivepaisa_fetch_option_data(access_token, user_key, stock, close_price, tgt, lots, "PE")
         else:
-            logger.write("⏸️ NO TRADE SIGNAL GENERATED")
+            LOG.info("⏸️ NO TRADE SIGNAL GENERATED")
