@@ -5,6 +5,8 @@ import datetime
 import logging
 #from logger_module import logger
 
+LOG = logging.getLogger(__name__)
+
 def zerodha_get_equity_balance(api_key, access_token):
 
     kite = KiteConnect(api_key)
