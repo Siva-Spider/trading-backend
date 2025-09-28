@@ -15,6 +15,7 @@ import requests
 import http.client
 import json
 
+LOG = logging.getLogger(__name__)
 
 def number_to_interval(num):
     """
