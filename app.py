@@ -388,10 +388,9 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
         LOG.info(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
         # loop until all stocks disconnected
         while any(active_trades.values()):
-            gevent.sleep(3)
+            gevent.sleep(2)
             now_ist = datetime.datetime.now(IST_TIMEZONE)
             now = now_ist.strftime("%Y-%m-%d %H:%M:%S")
-            LOG.info(f"Present time is: {now}")
             if now >= next_interval:
                 interval = trading_parameters[0].get("interval", "1minute")
                 now_interval, next_interval = nni.round_to_next_interval(interval)
