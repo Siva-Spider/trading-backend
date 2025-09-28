@@ -339,8 +339,7 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
             active_trades[stock['symbol']] = True
         LOG.info("✅ Trading loop started for all selected stocks")
         LOG.info("\n⏳ Starting new trading cycle setup...")
-        print(trading_parameters)
-        print(active_trades)
+        LOG.info(active_trades)
         # STEP 1: Fetch instrument keys once at the beginning
         for stock in trading_parameters:
             if not active_trades.get(stock['symbol']):
@@ -378,13 +377,10 @@ def run_trading_logic_for_all(trading_parameters, selected_brokers):
             else:
                 LOG.warning(f"⚠️ No instrument key found for {symbol}, skipping this stock.")
                 active_trades[stock['symbol']] = False
-                    
-        LOG.info("1")
+                
         # setup time intervals
         interval = trading_parameters[0].get("interval", "1minute")
-        LOG.info("2")
         now_interval, next_interval = nni.round_to_next_interval(interval)
-        LOG.info("3")
         LOG.info(f"Present Interval Start : {now_interval}, Next Interval Start :{next_interval}")
         # loop until all stocks disconnected
         while any(active_trades.values()):
