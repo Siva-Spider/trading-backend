@@ -22,7 +22,28 @@ class WebLogHandler(logging.Handler):
     def __init__(self, log_list):
         super().__init__()
         self.log_list = log_list
-        self.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+
+        # --- Timezone setup for IST ---
+        IST = pytz.timezone('Asia/Kolkata')
+
+        def converter(timestamp):
+            """
+            Converts a time.time() float timestamp into an IST-aware time.struct_time.
+            This function is set as the converter for the formatter.
+            """
+            dt_utc = datetime.datetime.fromtimestamp(timestamp, tz=pytz.utc)
+            dt_ist = dt_utc.astimezone(IST)
+            # The logging module expects a time.struct_time object, 
+            # so we convert the datetime object back.
+            return dt_ist.timetuple()
+
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        
+        # Set the custom converter function on the formatter
+        formatter.converter = converter
+        
+        self.setFormatter(formatter)
+        # -----------------------------
 
     def emit(self, record):
         """Formats and appends the log message to the shared list."""
