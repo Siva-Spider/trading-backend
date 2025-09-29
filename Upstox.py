@@ -441,7 +441,7 @@ def upstox_fetch_option_data(upstox_access_token,stock, spot_value, tgt,lots, op
     LOG.info(f"{stock}--{spot_value}--{tgt}--{lots}--{option_type}")
     indices = {"NIFTY": "Nifty 50", "BANKNIFTY": "Nifty Bank", "FINNIFTY": "Nifty Fin Service","MIDCPNIFTY": "NIFTY MID SELECT"}
 
-    if stock in indices:
+    if stock in indices.values():
         stock = indices[stock]
         instrument_type = "OPTIDX"
     else:
